@@ -38,7 +38,8 @@ locals {
   gke_s_account_fmt      = "${local.gke_shared_vpc_enabled ? format("serviceAccount:%s", local.gke_s_account) : ""}"
   project_bucket_name    = "${var.bucket_name != "" ? var.bucket_name : format("%s-state", local.temp_project_id)}"
   create_bucket          = "${var.bucket_project != "" ? "true" : "false"}"
-
+  shared_vpc_region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  shared_vpc_subnetwork  = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
   shared_vpc_users = "${compact(list(local.group_id, local.s_account_fmt, local.api_s_account_fmt, local.gke_s_account_fmt))}"
 
   # Workaround for https://github.com/hashicorp/terraform/issues/10857
@@ -52,6 +53,7 @@ resource "null_resource" "preconditions" {
     org_id           = "${var.org_id}"
     folder_id        = "${var.folder_id}"
     shared_vpc       = "${var.shared_vpc}"
+    shared_vpc_subnets = "${var.shared_vpc_subnets}"
   }
 
   provisioner "local-exec" {
@@ -61,7 +63,8 @@ ${path.module}/scripts/preconditions.sh \
     --billing_account '${var.billing_account}' \
     --org_id '${var.org_id}' \
     --folder_id '${var.folder_id}' \
-    --shared_vpc '${var.shared_vpc}'
+    --shared_vpc '${var.shared_vpc}' \
+    --shared_vpc_subnets '${var.shared_vpc_subnets}'
 EOD
 
     environment {
@@ -215,9 +218,9 @@ resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_sub
 
   count = "${var.shared_vpc != "" && length(compact(var.shared_vpc_subnets)) > 0 ? length(var.shared_vpc_subnets) : 0 }"
 
-  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
+  subnetwork = "${local.shared_vpc_subnetwork}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  region     = "${local.shared_vpc_region}"
   project    = "${var.shared_vpc}"
   member     = "${local.s_account_fmt}"
 }
@@ -232,9 +235,9 @@ resource "google_compute_subnetwork_iam_member" "group_role_to_vpc_subnets" {
 
   member     = "${local.group_id}"
   project    = "${var.shared_vpc}"
-  region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  region     = "${local.shared_vpc_region}"
   role       = "roles/compute.networkUser"
-  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
+  subnetwork = "${local.shared_vpc_subnetwork}"
 }
 
 /*************************************************************************************
@@ -245,9 +248,9 @@ resource "google_compute_subnetwork_iam_member" "apis_service_account_role_to_vp
 
   count = "${var.shared_vpc != "" && length(compact(var.shared_vpc_subnets)) > 0 ? length(var.shared_vpc_subnets) : 0 }"
 
-  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
+  subnetwork = "${local.shared_vpc_subnetwork}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  region     = "${local.shared_vpc_region}"
   project    = "${var.shared_vpc}"
   member     = "${local.api_s_account_fmt}"
 
@@ -321,9 +324,9 @@ resource "google_compute_subnetwork_iam_member" "gke_shared_vpc_subnets" {
 
   count = "${local.gke_shared_vpc_enabled && length(compact(var.shared_vpc_subnets)) != 0 ? length(var.shared_vpc_subnets) : 0}"
 
-  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
+  subnetwork = "${local.shared_vpc_subnetwork}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  region     = "${local.shared_vpc_region}"
   project    = "${var.shared_vpc}"
   member     = "${local.gke_s_account_fmt}"
 
