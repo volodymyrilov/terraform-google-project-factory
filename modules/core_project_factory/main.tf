@@ -215,9 +215,9 @@ resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_sub
 
   count = "${var.shared_vpc != "" && length(compact(var.shared_vpc_subnets)) > 0 ? length(var.shared_vpc_subnets) : 0 }"
 
-  subnetwork = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
+  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"regions"))+1)}"
+  region     = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"regions"))+1)}"
   project    = "${var.shared_vpc}"
   member     = "${local.s_account_fmt}"
 }
@@ -232,9 +232,9 @@ resource "google_compute_subnetwork_iam_member" "group_role_to_vpc_subnets" {
 
   member     = "${local.group_id}"
   project    = "${var.shared_vpc}"
-  region     = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"regions"))+1)}"
+  region     = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"regions"))+1)}"
   role       = "roles/compute.networkUser"
-  subnetwork = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
+  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
 }
 
 /*************************************************************************************
@@ -245,9 +245,9 @@ resource "google_compute_subnetwork_iam_member" "apis_service_account_role_to_vp
 
   count = "${var.shared_vpc != "" && length(compact(var.shared_vpc_subnets)) > 0 ? length(var.shared_vpc_subnets) : 0 }"
 
-  subnetwork = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
+  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"regions"))+1)}"
+  region     = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"regions"))+1)}"
   project    = "${var.shared_vpc}"
   member     = "${local.api_s_account_fmt}"
 
@@ -321,9 +321,9 @@ resource "google_compute_subnetwork_iam_member" "gke_shared_vpc_subnets" {
 
   count = "${local.gke_shared_vpc_enabled && length(compact(var.shared_vpc_subnets)) != 0 ? length(var.shared_vpc_subnets) : 0}"
 
-  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
+  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
   role       = "roles/compute.networkUser"
-  region     = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"regions"))+1)}"
+  region     = "${element(split("/", var.shared_vpc_subnets[count.index]),(index(split("/", var.shared_vpc_subnets[count.index]),"regions"))+1)}"
   project    = "${var.shared_vpc}"
   member     = "${local.gke_s_account_fmt}"
 
