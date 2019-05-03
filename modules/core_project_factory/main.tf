@@ -38,8 +38,6 @@ locals {
   gke_s_account_fmt      = "${local.gke_shared_vpc_enabled ? format("serviceAccount:%s", local.gke_s_account) : ""}"
   project_bucket_name    = "${var.bucket_name != "" ? var.bucket_name : format("%s-state", local.temp_project_id)}"
   create_bucket          = "${var.bucket_project != "" ? "true" : "false"}"
-  shared_vpc_region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
-  shared_vpc_subnetwork  = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
   shared_vpc_users = "${compact(list(local.group_id, local.s_account_fmt, local.api_s_account_fmt, local.gke_s_account_fmt))}"
 
   # Workaround for https://github.com/hashicorp/terraform/issues/10857
