@@ -38,7 +38,8 @@ locals {
   gke_s_account_fmt      = "${local.gke_shared_vpc_enabled ? format("serviceAccount:%s", local.gke_s_account) : ""}"
   project_bucket_name    = "${var.bucket_name != "" ? var.bucket_name : format("%s-state", local.temp_project_id)}"
   create_bucket          = "${var.bucket_project != "" ? "true" : "false"}"
-
+  shared_vpc_region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
+  shared_vpc_subnetwork  = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
   shared_vpc_users = "${compact(list(local.group_id, local.s_account_fmt, local.api_s_account_fmt, local.gke_s_account_fmt))}"
 
   # Workaround for https://github.com/hashicorp/terraform/issues/10857
@@ -63,6 +64,7 @@ ${path.module}/scripts/preconditions.sh \
     --org_id '${var.org_id}' \
     --folder_id '${var.folder_id}' \
     --shared_vpc '${var.shared_vpc}' \
+
     --shared_vpc_subnets '${join(";",var.shared_vpc_subnets)}'
 EOD
 
@@ -236,11 +238,13 @@ resource "google_compute_subnetwork_iam_member" "group_role_to_vpc_subnets" {
 
   member     = "${local.group_id}"
   project    = "${var.shared_vpc}"
+
 //  region     = "${element(split("/", var.shared_vpc_subnets[count.index]), 3)}"
   region     = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"regions"))+1)}"
   role       = "roles/compute.networkUser"
 //  subnetwork = "${element(split("/", var.shared_vpc_subnets[count.index]), 5)}"
   subnetwork = "${element(split("/",var.shared_vpc_subnets[count.index]),(index(split("/",var.shared_vpc_subnets[count.index]),"subnetworks"))+1)}"
+
 }
 
 /*************************************************************************************
