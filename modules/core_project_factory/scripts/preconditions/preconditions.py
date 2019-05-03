@@ -395,10 +395,6 @@ def argparser():
         '--shared_vpc', required=False, action=EmptyStrAction,
         help='The project ID of the shared VPC host'
     )
-    parser.add_argument(
-        '--shared_vpc_subnets', required=False, action=EmptyStrAction,
-        help='List of shared vpc subnetwork names'
-    )
 
     return parser
 

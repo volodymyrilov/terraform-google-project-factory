@@ -47,11 +47,11 @@ locals {
 
 resource "null_resource" "preconditions" {
   triggers {
-    credentials_path   = "${var.credentials_path}"
-    billing_account    = "${var.billing_account}"
-    org_id             = "${var.org_id}"
-    folder_id          = "${var.folder_id}"
-    shared_vpc         = "${var.shared_vpc}"
+    credentials_path = "${var.credentials_path}"
+    billing_account  = "${var.billing_account}"
+    org_id           = "${var.org_id}"
+    folder_id        = "${var.folder_id}"
+    shared_vpc       = "${var.shared_vpc}"
   }
 
   provisioner "local-exec" {
@@ -68,12 +68,6 @@ EOD
       GRACEFUL_IMPORTERROR = "true"
     }
   }
-}
-
-resource "null_resource" "is_subnetworks_valid" {
-  count = "${local.gke_shared_vpc_enabled && length(compact(var.shared_vpc_subnets)) != 0 ? length(var.shared_vpc_subnets) : 0}"
-  network = "${split("/",var.shared_vpc_subnets) == "" ? 0 : 1}"
-  "ERROR: The env value can only be: dev, qa or prod" = true
 }
 
 /*******************************************
